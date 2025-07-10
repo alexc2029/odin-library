@@ -1,0 +1,9 @@
+#books {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+form {
+	display: grid;
+	row-gap: 15px;
+}
