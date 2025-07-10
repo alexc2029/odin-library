@@ -1,4 +1,4 @@
-const Library = [];
+let Library = [];
 
 function Book(title, author, pages, read) {
 	if (!new.target)
@@ -18,26 +18,59 @@ function addBookToLibrary(title, author, pages, read) {
 	Library.push(book);
 }
 
-addBookToLibrary("The Hobbit", "J.R.R. Tolkien", 295, "not read yet");
-addBookToLibrary("Harry Potter", "J.K. Rowling", 400, "read");
+function removeBook(id) {
+	const index = Library.findIndex((book) => book.id == id);
+	Library.splice(index, 1);
+}
 
 function displayBooks() {
+	const container = document.getElementById("books");
+	container.innerHTML = "";
 	for (const book of Library) {
 		const para = document.createElement("p");
 		const info = book.info();
 		const text = document.createTextNode(info);
 		para.appendChild(text);
 
-		const container = document.getElementById("books");
-		container.appendChild(para);
+		const removeButton = document.createElement("button");
+		removeButton.innerText = "Remove book";
+
+		const div = document.createElement("div");
+		div.setAttribute("data-id", book.id);
+
+		div.appendChild(para);
+		div.appendChild(removeButton);
+
+		container.appendChild(div);
+
+		removeButton.addEventListener("click", () => {
+			div.remove();
+			const parent = removeButton.parentElement;
+			removeBook(parent.dataset.id);
+		});
 	}
 }
-
-displayBooks();
 
 const addBookButton = document.querySelector("[data-open-modal]");
 const addBookModal = document.querySelector("[data-modal]");
 
 addBookButton.addEventListener("click", () => {
 	addBookModal.showModal();
+});
+
+let submitBookButton = document.getElementById("submitBook");
+
+submitBookButton.addEventListener("click", (e) => {
+	e.preventDefault();
+	const title = document.getElementById("title");
+	const author = document.getElementById("author");
+	const pages = document.getElementById("pages");
+	const read = document.getElementById("read");
+	addBookToLibrary(title.value, author.value, pages.value, read.value);
+	title.value = "";
+	author.value = "";
+	pages.value = "";
+	read.value = "";
+	addBookModal.close();
+	displayBooks();
 });
