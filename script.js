@@ -9,9 +9,23 @@ function Book(title, author, pages, read) {
 	this.read = read;
 	this.id = crypto.randomUUID();
 	this.info = function () {
-		return title + " by " + author + ", " + pages + " pages, " + read;
+		return (
+			this.title +
+			" by " +
+			this.author +
+			", " +
+			this.pages +
+			" pages, " +
+			this.read
+		);
 	};
 }
+
+Book.prototype.toggleRead = function () {
+	if (this.read == "read") this.read = "not read yet";
+	else if (this.read == "not read yet") this.read = "read";
+	displayBooks();
+};
 
 function addBookToLibrary(title, author, pages, read) {
 	let book = new Book(title, author, pages, read);
@@ -35,18 +49,27 @@ function displayBooks() {
 		const removeButton = document.createElement("button");
 		removeButton.innerText = "Remove book";
 
+		const toggleReadButton = document.createElement("button");
+		toggleReadButton.innerText = "Toggle Read";
+
 		const div = document.createElement("div");
 		div.setAttribute("data-id", book.id);
 
 		div.appendChild(para);
+		div.appendChild(toggleReadButton);
 		div.appendChild(removeButton);
 
 		container.appendChild(div);
 
 		removeButton.addEventListener("click", () => {
 			div.remove();
-			const parent = removeButton.parentElement;
-			removeBook(parent.dataset.id);
+			removeBook(div.dataset.id);
+		});
+		toggleReadButton.addEventListener("click", () => {
+			const index = Library.findIndex(
+				(book) => book.id == div.dataset.id
+			);
+			Library[index].toggleRead();
 		});
 	}
 }
