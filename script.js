@@ -1,5 +1,3 @@
-let Library = [];
-
 class Book {
 	constructor(title, author, pages, read) {
 		this.title = title;
@@ -23,77 +21,93 @@ class Book {
 	toggleRead() {
 		if (this.read == "read") this.read = "not read yet";
 		else if (this.read == "not read yet") this.read = "read";
-		displayBooks();
+		UI.displayBooks();
 	}
 }
 
-function addBookToLibrary(title, author, pages, read) {
-	let book = new Book(title, author, pages, read);
-	Library.push(book);
+class Library {
+	constructor() {
+		this.books = [];
+	}
+	addBookToLibrary(title, author, pages, read) {
+		let book = new Book(title, author, pages, read);
+		this.books.push(book);
+	}
+	removeBook(id) {
+		const index = this.books.findIndex((book) => book.id == id);
+		this.books.splice(index, 1);
+	}
 }
 
-function removeBook(id) {
-	const index = Library.findIndex((book) => book.id == id);
-	Library.splice(index, 1);
-}
+class UI {
+	static library = new Library();
 
-function displayBooks() {
-	const container = document.getElementById("books");
-	container.innerHTML = "";
-	for (const book of Library) {
-		const para = document.createElement("p");
-		const info = book.info();
-		const text = document.createTextNode(info);
-		para.appendChild(text);
+	static displayBooks() {
+		const container = document.getElementById("books");
+		container.innerHTML = "";
+		for (const book of UI.library.books) {
+			const para = document.createElement("p");
+			const info = book.info();
+			const text = document.createTextNode(info);
+			para.appendChild(text);
 
-		const removeButton = document.createElement("button");
-		removeButton.innerText = "Remove book";
+			const removeButton = document.createElement("button");
+			removeButton.innerText = "Remove book";
 
-		const toggleReadButton = document.createElement("button");
-		toggleReadButton.innerText = "Toggle Read";
+			const toggleReadButton = document.createElement("button");
+			toggleReadButton.innerText = "Toggle Read";
 
-		const div = document.createElement("div");
-		div.setAttribute("data-id", book.id);
+			const div = document.createElement("div");
+			div.setAttribute("data-id", book.id);
 
-		div.appendChild(para);
-		div.appendChild(toggleReadButton);
-		div.appendChild(removeButton);
+			div.appendChild(para);
+			div.appendChild(toggleReadButton);
+			div.appendChild(removeButton);
 
-		container.appendChild(div);
+			container.appendChild(div);
 
-		removeButton.addEventListener("click", () => {
-			div.remove();
-			removeBook(div.dataset.id);
+			removeButton.addEventListener("click", () => {
+				div.remove();
+				UI.library.removeBook(div.dataset.id);
+			});
+			toggleReadButton.addEventListener("click", () => {
+				const index = UI.library.books.findIndex(
+					(book) => book.id == div.dataset.id
+				);
+				UI.library.books[index].toggleRead();
+			});
+		}
+	}
+	static initializeModal() {
+		const addBookButton = document.querySelector("[data-open-modal]");
+		const addBookModal = document.querySelector("[data-modal]");
+
+		addBookButton.addEventListener("click", () => {
+			addBookModal.showModal();
 		});
-		toggleReadButton.addEventListener("click", () => {
-			const index = Library.findIndex(
-				(book) => book.id == div.dataset.id
+
+		let submitBookButton = document.getElementById("submitBook");
+
+		submitBookButton.addEventListener("click", (e) => {
+			e.preventDefault();
+			const title = document.getElementById("title");
+			const author = document.getElementById("author");
+			const pages = document.getElementById("pages");
+			const read = document.getElementById("read");
+			UI.library.addBookToLibrary(
+				title.value,
+				author.value,
+				pages.value,
+				read.value
 			);
-			Library[index].toggleRead();
+			title.value = "";
+			author.value = "";
+			pages.value = "";
+			read.value = "";
+			addBookModal.close();
+			UI.displayBooks();
 		});
 	}
 }
 
-const addBookButton = document.querySelector("[data-open-modal]");
-const addBookModal = document.querySelector("[data-modal]");
-
-addBookButton.addEventListener("click", () => {
-	addBookModal.showModal();
-});
-
-let submitBookButton = document.getElementById("submitBook");
-
-submitBookButton.addEventListener("click", (e) => {
-	e.preventDefault();
-	const title = document.getElementById("title");
-	const author = document.getElementById("author");
-	const pages = document.getElementById("pages");
-	const read = document.getElementById("read");
-	addBookToLibrary(title.value, author.value, pages.value, read.value);
-	title.value = "";
-	author.value = "";
-	pages.value = "";
-	read.value = "";
-	addBookModal.close();
-	displayBooks();
-});
+UI.initializeModal();
